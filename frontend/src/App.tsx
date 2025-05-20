@@ -1,42 +1,47 @@
 import React, { useState } from 'react';
 import './App.css';
 import Player from './components/player/Player';
-
-interface Cell {
-  id: string;
-  row: number;
-  col: number;
-}
+import { cellWall, cellExit } from './utils/cellProperties';
+import { Cell } from './types/cell';
 
 interface PlayerPosition {
-  row: number;
-  col: number;
+  x: number;
+  y: number;
 }
 
 // Main application component - Renders the welcome page
 function App() {
   const [cells, setCells] = useState<Cell[]>(() => {
     const newCells: Cell[] = [];
-    for (let row = 0; row < 15; row++) {
-      for (let col = 0; col < 20; col++) {
-        newCells.push({
+    for (let row = 0; row < 18; row++) {
+      for (let col = 0; col < 18; col++) {
+        const cell = {
           id: `${row}-${col}`,
           row,
           col
-        });
+        };
+        newCells.push(cellExit(cell));
       }
     }
     return newCells;
   });
 
-  const [playerPosition, setPlayerPosition] = useState<PlayerPosition>({ row: 7, col: 10 });
+  const [playerPosition, setPlayerPosition] = useState<PlayerPosition>(() => {
+    // Position centrale en tenant compte de la taille du joueur et des marges
+    const centerX = (36 * 9) + 1; // 9 cellules - moitié de la taille du joueur
+    const centerY = (36 * 9) + 1; // 9 cellules - moitié de la taille du joueur
+    return { x: centerX, y: centerY };
+  });
+
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [showInfo, setShowInfo] = useState(false);
 
   const handleCellClick = (cell: Cell) => {
-    setSelectedCell(cell);
-    setShowInfo(true);
+    if (!cell.isWall) {
+      setSelectedCell(cell);
+      setShowInfo(true);
+    }
   };
 
   const handleMouseMove = (event: React.MouseEvent) => {
@@ -72,32 +77,27 @@ function App() {
             {cells.map(cell => (
               <div
                 key={cell.id}
-                className={`cell ${selectedCell?.id === cell.id ? 'selected' : ''}`}
+                className={`cell ${selectedCell?.id === cell.id ? 'selected' : ''} ${cell.isWall ? 'wall' : ''} ${cell.isExit ? 'exit' : ''}`}
                 onClick={() => handleCellClick(cell)}
                 onMouseEnter={() => handleCellMouseEnter(cell)}
                 onMouseLeave={handleCellMouseLeave}
               />
             ))}
             <Player
-              initialPosition={playerPosition}
+              position={playerPosition}
               onPositionChange={handlePlayerPositionChange}
+              setShowInfo={setShowInfo}
+              setSelectedCell={setSelectedCell}
             />
           </div>
-          {showInfo && selectedCell && (
+          {showInfo && selectedCell && !selectedCell.isWall && (
             <div 
               className="cell-info"
-              style={{
-                left: `${mousePosition.x + 15}px`,
-                top: `${mousePosition.y + 15}px`
-              }}
             >
               <h3>Informations Cellule</h3>
-              <p>ID: {selectedCell.id}</p>
+             
               <p>Position: ({selectedCell.row}, {selectedCell.col})</p>
-              <p>Distance du joueur: {
-                Math.abs(selectedCell.row - playerPosition.row) + 
-                Math.abs(selectedCell.col - playerPosition.col)
-              } cases</p>
+              <p>is an exit: {selectedCell.isExit ? 'true' : 'false'}</p>
             </div>
           )}
         </div>

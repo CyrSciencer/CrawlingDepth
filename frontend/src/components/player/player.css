@@ -1,11 +1,12 @@
 .player {
+  position: absolute;
+  width: 33px;
+  height: 33px;
   background-color: #ff0000;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  margin: auto;
-  transition: all 0.1s ease-in-out;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease;
+  z-index: 1000;
+  pointer-events: none;
 }
 
 .player-body {

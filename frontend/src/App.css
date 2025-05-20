@@ -27,18 +27,40 @@
 
 .game-board {
   display: grid;
-  grid-template-columns: repeat(20, 40px);
-  grid-template-rows: repeat(15, 40px);
+  grid-template-columns: repeat(18, 35px);
+  grid-template-rows: repeat(18, 35px);
   gap: 1px;
-  background-color: #333;
+  background-color: #989898;
   padding: 1px;
   border: 2px solid #666;
+  position: relative;
 }
 
 .cell {
+  width: 35px;
+  height: 35px;
   background-color: #fff;
   cursor: pointer;
   transition: background-color 0.2s;
+  position: relative;
+}
+
+.cell.wall {
+  background-color: #666;
+  cursor: not-allowed;
+}
+
+.cell.wall:hover {
+  background-color: #666;
+}
+
+.cell.exit {
+  background-color: #ffd700; /* Jaune doré */
+  cursor: pointer;
+}
+
+.cell.exit:hover {
+  background-color: #ffc000; /* Jaune plus foncé au survol */
 }
 
 .cell:hover {
@@ -58,6 +80,8 @@
   z-index: 1000;
   pointer-events: none;
   min-width: 200px;
+  left: 10px;
+  top: 80px;
 }
 
 .cell-info h3 {
@@ -68,4 +92,16 @@
 .cell-info p {
   margin: 5px 0;
   color: #666;
+}
+
+.player {
+  position: absolute;
+  width: 33px;
+  height: 33px;
+  background-color: #ff0000;
+  border-radius: 50%;
+  transition: transform 0.1s ease;
+  z-index: 1000;
+  pointer-events: none;
+  margin: 1px;
 }
