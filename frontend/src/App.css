@@ -6,8 +6,11 @@
 }
 
 .App-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
   background-color: #282c34;
-  padding: 20px;
   color: white;
 }
 
@@ -45,9 +48,32 @@
   position: relative;
 }
 
+/* Priorités des cellules */
+.cell.priority-0 {
+  background-color: rgba(0, 255, 0, 0.2); /* Cellule sélectionnée */
+}
+
+.cell.priority-1 {
+  background-color: #2b2b2b; /* Unbreakable (wall + exit) */
+}
+
+.cell.priority-2 {
+  background-color: #ffd700; /* Exit */
+}
+
+.cell.priority-3 {
+  background-color: #666; /* Wall */
+}
+
+.cell.priority-4 {
+  background-color: #fff; /* Basic cell */
+}
+
+.cell.unbreakable {
+  background-color: #2b2b2b;
+}
 .cell.wall {
   background-color: #666;
-  cursor: not-allowed;
 }
 
 .cell.wall:hover {
@@ -65,6 +91,12 @@
 
 .cell:hover {
   background-color: #e0e0e0;
+}
+
+.cell.priority-1:hover,
+.cell.priority-2:hover,
+.cell.priority-3:hover {
+  background-color: inherit; /* Garde la couleur de base au survol pour les cellules spéciales */
 }
 
 .cell.selected {
@@ -104,4 +136,18 @@
   z-index: 1000;
   pointer-events: none;
   margin: 1px;
+}
+
+.return-button {
+  padding: 0.5rem 1rem;
+  background-color: #666;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.return-button:hover {
+  background-color: #888;
 }

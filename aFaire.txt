@@ -1,0 +1,7 @@
+jouer: non
+crée un nouveau joueur + utiliser un joueur.(3slots)
+map creation ne doit pas "débordé" dans la map de base.
+créer un newplayer:
+--apparition 4sortie vide.
+Utilise un player:
+--apparait là où il à été laisssé.
