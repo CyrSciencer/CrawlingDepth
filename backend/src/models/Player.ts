@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-interface IPlayer extends Document {
+export interface IPlayer extends Document {
     inventorySpace: number;
     health: number;
     movementPerTurn: number;
@@ -32,6 +32,43 @@ interface IPlayer extends Document {
     };
     craftingMaterials: {
         metalRod: number;
+    };
+    mapsBound: {
+        [mapId: string]: {
+            baseMapId: mongoose.Types.ObjectId;
+            playerId: mongoose.Types.ObjectId;
+            modifiedLayout: {
+                cells: Array<{
+                    x: number;
+                    y: number;
+                    type: 'wall' | 'floor' | 'exit' | 'unbreakable';
+                    resources: {
+                        stone: number;
+                        iron: number;
+                        copper: number;
+                        zinc: number;
+                        tin: number;
+                        gold: number;
+                        silver: number;
+                    };
+                }>;
+            };
+            modifications: Array<{
+                x: number;
+                y: number;
+                originalType: string;
+                newType: string;
+                modifiedAt: Date;
+            }>;
+            connections: {
+                north?: { mapId: string; baseMapId: mongoose.Types.ObjectId };
+                south?: { mapId: string; baseMapId: mongoose.Types.ObjectId };
+                east?: { mapId: string; baseMapId: mongoose.Types.ObjectId };
+                west?: { mapId: string; baseMapId: mongoose.Types.ObjectId };
+            };
+            createdAt: Date;
+            lastModifiedAt: Date;
+        };
     };
 }
 
@@ -67,6 +104,44 @@ const PlayerSchema: Schema = new Schema({
     },
     craftingMaterials: {
         metalRod: { type: Number, default: 4 }
+    },
+    mapsBound: {
+        type: Map,
+        of: {
+            baseMapId: { type: Schema.Types.ObjectId, ref: 'BaseMap', required: true },
+            playerId: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
+            modifiedLayout: {
+                cells: [{
+                    x: { type: Number, required: true },
+                    y: { type: Number, required: true },
+                    type: { type: String, required: true, enum: ['wall', 'floor', 'exit', 'unbreakable'] },
+                    resources: {
+                        stone: { type: Number, default: 0 },
+                        iron: { type: Number, default: 0 },
+                        copper: { type: Number, default: 0 },
+                        zinc: { type: Number, default: 0 },
+                        tin: { type: Number, default: 0 },
+                        gold: { type: Number, default: 0 },
+                        silver: { type: Number, default: 0 }
+                    }
+                }]
+            },
+            modifications: [{
+                x: { type: Number, required: true },
+                y: { type: Number, required: true },
+                originalType: { type: String, required: true },
+                newType: { type: String, required: true },
+                modifiedAt: { type: Date, default: Date.now }
+            }],
+            connections: {
+                north: { mapId: String, baseMapId: { type: Schema.Types.ObjectId, ref: 'BaseMap' } },
+                south: { mapId: String, baseMapId: { type: Schema.Types.ObjectId, ref: 'BaseMap' } },
+                east: { mapId: String, baseMapId: { type: Schema.Types.ObjectId, ref: 'BaseMap' } },
+                west: { mapId: String, baseMapId: { type: Schema.Types.ObjectId, ref: 'BaseMap' } }
+            },
+            createdAt: { type: Date, default: Date.now },
+            lastModifiedAt: { type: Date, default: Date.now }
+        }
     }
 });
 

@@ -14,6 +14,11 @@ interface PlayerPosition {
 
 type GameMode = 'menu' | 'gameplay' | 'mapCreator';
 
+interface MainMenuProps {
+  onStartGame: () => void;
+  onModeSelect: (mode: 'gameplay' | 'mapCreator') => void;
+}
+
 // Main application component - Renders the welcome page
 function App() {
   const [gameMode, setGameMode] = useState<GameMode>('menu');
@@ -47,9 +52,18 @@ function App() {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [showInfo, setShowInfo] = useState(false);
+  const [characterId, setCharacterId] = useState<string | null>(null);
+  const [gameSelection, setGameSelection] = useState<'new' | 'continue'>('new');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentMap, setCurrentMap] = useState<any>(null);
 
   const handleModeSelect = (mode: 'gameplay' | 'mapCreator') => {
     setGameMode(mode);
+  };
+
+  const handleStartGame = () => {
+    setGameMode('gameplay');
   };
 
   const handleReturnToMenu = () => {
@@ -129,8 +143,72 @@ function App() {
     }
   };
 
+  const handleGameSelection = async (selection: 'new' | 'continue') => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      if (selection === 'new') {
+        // Supprimer l'ancien personnage s'il existe
+        if (characterId) {
+          try {
+            await axios.delete(`/api/players/${characterId}`);
+            localStorage.removeItem('characterId');
+            setCharacterId(null);
+          } catch (err) {
+            console.error('Error deleting old character:', err);
+            // On continue même si la suppression échoue
+          }
+        }
+        
+        // Créer un nouveau personnage
+        const response = await axios.post('/api/players', {
+          position: {
+            x: playerPosition.x,
+            y: playerPosition.y
+          }
+        });
+        
+        const newCharacterId = response.data._id;
+        setCharacterId(newCharacterId);
+        localStorage.setItem('characterId', newCharacterId);
+        
+        // Reset current map to force loading of new map
+        setCurrentMap(null);
+      } else {
+        // Vérifier si un personnage existe
+        if (!characterId) {
+          throw new Error('Aucun personnage sauvegardé trouvé');
+        }
+        
+        // Charger le personnage existant
+        const response = await axios.get(`/api/players/${characterId}`);
+        const playerData = response.data;
+        
+        // Mettre à jour la position du joueur avec les données sauvegardées
+        setPlayerPosition({
+          x: playerData.position.x,
+          y: playerData.position.y
+        });
+      }
+      
+      setGameSelection(selection);
+      setGameMode('gameplay');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Une erreur est survenue');
+      console.error('Erreur lors de la gestion du personnage:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (gameMode === 'menu') {
-    return <MainMenu onModeSelect={handleModeSelect} />;
+    return (
+      <MainMenu 
+        onStartGame={handleStartGame}
+        onModeSelect={handleModeSelect}
+      />
+    );
   }
 
   return (
